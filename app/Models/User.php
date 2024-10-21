@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject; // Importando o JWTSubject
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject // Implementando JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -18,9 +19,12 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'codigo', 
+        'nome',   
+        'usuario',
         'email',
         'password',
+        'ativo',  
     ];
 
     /**
@@ -40,5 +44,27 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'ativo' => 'boolean', // Definindo o campo ativo como booleano
     ];
+
+    /**
+     * Relação com o modelo Estoque
+     */
+    public function estoques()
+    {
+        return $this->hasMany(Estoque::class, 'user_id');
+    }
+
+    /**
+     * Implementação dos métodos obrigatórios do JWTSubject
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }
